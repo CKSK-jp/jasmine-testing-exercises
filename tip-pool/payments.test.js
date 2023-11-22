@@ -1,58 +1,67 @@
-describe("Payment tests (with setup and tear-down)", function () {
+describe("Payments test (with setup and tear-down)", function () {
   beforeEach(function () {
-    // initialization logic
-    billAmtInput.value = 200;
+    billAmtInput.value = 100;
     tipAmtInput.value = 20;
   });
 
-  it('should check if payment inputs are properly stored in the allPayments object', function () {
+  it('should add a new payment to allPayments on submitPaymentInfo()', function () {
     submitPaymentInfo();
 
     expect(Object.keys(allPayments).length).toEqual(1);
-    expect(allPayments['payment1'].billAmt).toEqual('200');
+    expect(allPayments['payment1'].billAmt).toEqual('100');
     expect(allPayments['payment1'].tipAmt).toEqual('20');
-    expect(allPayments['payment1'].tipPercent).toEqual(10);
+    expect(allPayments['payment1'].tipPercent).toEqual(20);
   });
 
-  it('should check for empty inputs and not add it to allPayments object', function () {
-    billAmtInput = '';
+  it('should not add a new payment on submitPaymentInfo() with empty input', function () {
+    billAmtInput.value = '';
     submitPaymentInfo();
 
     expect(Object.keys(allPayments).length).toEqual(0);
   });
 
-  it('should check if payment inputs are updated onto paymentTable using apendPaymentTable function', function () {
-    let currentPayment = createCurPayment();
-    allPayments['payment1'] = currentPayment;
-    console.log(currentPayment);
-    appendPaymentTable(currentPayment);
+  it('should payment update #paymentTable on appendPaymentTable()', function () {
+    let curPayment = createCurPayment();
+    allPayments['payment1'] = curPayment;
 
-    let currentPaymentTable = document.querySelector('#paymentTable tbody').childElementCount;
-    
-    expect(currentPaymentTable).toEqual(1);
-    expect(document.querySelector('#payment1').firstChild.innerText).toEqual('$200');
+    appendPaymentTable(curPayment);
+
+    let curTdList = document.querySelectorAll('#paymentTable tbody tr td');
+
+    expect(curTdList.length).toEqual(4);
+    expect(curTdList[0].innerText).toEqual('$100');
+    expect(curTdList[1].innerText).toEqual('$20');
+    expect(curTdList[2].innerText).toEqual('%20');
+    expect(curTdList[3].innerText).toEqual('X');
   });
 
-  // it('should check if an additional payment is saved into the summaryTable', function () {
-  //   submitPaymentInfo();
-  //   billAmtInput.value = 400;
-  //   tipAmtInput.value = 35;
-  //   let currentPayment = createCurPayment();
-  //   allPayments['payment2'] = currentPayment;
-  //   console.log(allPayments);
-  //   appendPaymentTable(currentPayment);
-  //   expect(Object.keys(allPayments).length).toEqual(2);
-  //   expect(document.querySelector('#paymentTable tbody').childElementCount).toEqual(1);
-  //   expect(document.querySelector('#payment1').firstChild.innerText).toEqual('$200');
-  // });
+  it('should create a new payment on createCurPayment()', function () {
+    let expectedPayment = {
+      billAmt: '100',
+      tipAmt: '20',
+      tipPercent: 20,
+    }
 
-  afterEach(function () {
-    // teardown logic
+    expect(createCurPayment()).toEqual(expectedPayment);
+  });
+
+  it('should not create payment with empty input on createCurPayment()', function () {
     billAmtInput.value = '';
     tipAmtInput.value = '';
+    let curPayment = createCurPayment();
+
+    expect(curPayment).toEqual(undefined);
+  });
+
+  afterEach(function () {
+    billAmtInput.value = '';
+    tipAmtInput.value = '';
+    paymentTbody.innerHTML = '';
+    summaryTds[0].innerHTML = '';
+    summaryTds[1].innerHTML = '';
+    summaryTds[2].innerHTML = '';
+    serverTbody.innerHTML = '';
     paymentId = 0;
     allPayments = {};
-    paymentTbody.innerHTML = '';
-    serverTbody.innerHTML = '';
   });
 });
